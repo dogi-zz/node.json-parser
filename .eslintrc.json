@@ -1,0 +1,31 @@
+{
+  "env": {
+    "es6": true,
+    "browser": false,
+    "node": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/adjacent-overload-signatures": "error",
+    "@typescript-eslint/explicit-member-accessibility": ["error", { "accessibility": "explicit" }],
+    "@typescript-eslint/array-type": ["error", { "default": "array" }],
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/ no-inferrable-types": "off",
+    "max-len": ["error", { "code": 240 }],
+    "no-console": "warn",
+    "prefer-template": "warn",
+    "semi": ["error", "always"],
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "always-multiline"
+    }]
+  }
+}
