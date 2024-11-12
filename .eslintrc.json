@@ -1,15 +1,21 @@
 {
+  "root": true,
   "env": {
     "es6": true,
     "browser": false,
     "node": true
   },
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
   ],
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
   "rules": {
     "@typescript-eslint/adjacent-overload-signatures": "error",
     "@typescript-eslint/explicit-member-accessibility": ["error", { "accessibility": "explicit" }],

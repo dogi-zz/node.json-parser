@@ -1,5 +1,5 @@
 import {JsonLexerToken, TokenType, TokenTypes} from './json-lexer';
-import {JsonParser, ParserOptions} from './json-parser';
+import {JsonParser, ParserOptions, ParserTokenType} from './json-parser';
 
 const {OBJ_START, OBJ_END, ARR_START, ARR_END, COMMA, COLON, NULL, BOOLEAN, NUMBER, STRING} = TokenTypes;
 
@@ -7,7 +7,7 @@ export const NEW_LINE = 'new-line';
 export const WHITE_SPACE = 'white';
 
 export type JsonFormatterToken = {
-  type: TokenType | 'new-line' | 'white',
+  type: ParserTokenType | 'new-line' | 'white',
   token?: JsonLexerToken;
   pos: [number, number]
   rawString: string,
@@ -54,8 +54,8 @@ export class JsonFormatter extends JsonParser {
     this.formatColumn = this.actualIndent.length;
   }
 
-  protected override onJsonLexerToken(token: JsonLexerToken) {
-    super.onJsonLexerToken(token);
+  protected override onJsonParserToken(type: ParserTokenType, token: JsonLexerToken) {
+    super.onJsonParserToken(type, token);
 
     if (token.type === OBJ_END || token.type === ARR_END) {
       this.jsonFormatterNewLine(this.actualIndent.slice(0, -2));
@@ -66,7 +66,7 @@ export class JsonFormatter extends JsonParser {
         rawString = JSON.stringify(token.stringValue);
       }
       this.onJsonFormatterToken({
-        type: token.type,
+        type,
         token,
         pos: [this.formatLine, this.formatColumn],
         rawString,

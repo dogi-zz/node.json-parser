@@ -1,6 +1,9 @@
-import {JsonLexer, JsonLexerToken, LexerOptions, TokenTypes} from './json-lexer';
+import {JsonLexer, JsonLexerToken, LexerOptions, TokenType, TokenTypes} from './json-lexer';
 
 const {OBJ_START, OBJ_END, ARR_START, ARR_END, COMMA, COLON, NULL, BOOLEAN, NUMBER, STRING} = TokenTypes;
+
+export const KEY = 'key';
+export type ParserTokenType = TokenType | 'key';
 
 type ParseState = { type: 'finished' }
   | { type: 'object', token: JsonLexerToken, key: string, state: 'none' | 'hasKey' | 'hasColon' | 'hasValue' | 'next', value: any }
@@ -124,6 +127,7 @@ export class JsonParser extends JsonLexer {
     super.onJsonLexerToken(token);
 
     if (this.resultStack.length === 0) {
+      this.onJsonParserToken(token.type, token);
       this.jsonParserParseValue(token);
       return;
     }
@@ -131,6 +135,7 @@ export class JsonParser extends JsonLexer {
     if (this.resultStack[0].type === 'object') {
       if (token.type === OBJ_END) {
         if (endObjectOrArrayPossible(this.resultStack[0], this.parserOptions)) {
+          this.onJsonParserToken(token.type, token);
           const value = this.resultStack[0].value;
           this.resultStack.shift();
           this.jsonParserPerformResult(value, token);
@@ -138,20 +143,24 @@ export class JsonParser extends JsonLexer {
         }
       } else if (this.resultStack[0].state === 'none' || this.resultStack[0].state === 'next') {
         if (token.type === STRING) {
+          this.onJsonParserToken(KEY, token);
           this.resultStack[0].key = token.stringValue;
           this.resultStack[0].state = 'hasKey';
           return;
         }
       } else if (this.resultStack[0].state === 'hasKey') {
         if (token.type === COLON) {
+          this.onJsonParserToken(token.type, token);
           this.resultStack[0].state = 'hasColon';
           return;
         }
       } else if (this.resultStack[0].state === 'hasColon') {
+        this.onJsonParserToken(token.type, token);
         this.jsonParserParseValue(token);
         return;
       } else if (this.resultStack[0].state === 'hasValue') {
         if (token.type === COMMA) {
+          this.onJsonParserToken(token.type, token);
           this.resultStack[0].state = 'next';
           return;
         }
@@ -161,16 +170,19 @@ export class JsonParser extends JsonLexer {
     if (this.resultStack[0].type === 'array') {
       if (token.type === ARR_END) {
         if (endObjectOrArrayPossible(this.resultStack[0], this.parserOptions)) {
+          this.onJsonParserToken(token.type, token);
           const value = this.resultStack[0].value;
           this.resultStack.shift();
           this.jsonParserPerformResult(value, token);
           return;
         }
       } else if (this.resultStack[0].state === 'none' || this.resultStack[0].state === 'next') {
+        this.onJsonParserToken(token.type, token);
         this.jsonParserParseValue(token);
         return;
       } else if (this.resultStack[0].state === 'hasValue') {
         if (token.type === COMMA) {
+          this.onJsonParserToken(token.type, token);
           this.resultStack[0].state = 'next';
           return;
         }
@@ -178,6 +190,10 @@ export class JsonParser extends JsonLexer {
     }
 
     throw new Error(`JsonParser: Unexpected token type ${token.type} at Position ${token.pos} [${token.line}:${token.column}]`);
+  }
+
+  protected onJsonParserToken(type: ParserTokenType, token: JsonLexerToken) {
+
   }
 
 }
